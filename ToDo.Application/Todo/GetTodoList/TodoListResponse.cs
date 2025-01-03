@@ -7,5 +7,5 @@ public sealed class TodoListResponse
     public Guid OwnerId { get; init; }
     public string Title { get; init; }
     public string? Description { get; init; }
-    public DateOnly CreatedOnUtc { get; init; }
+    public DateTime CreatedOnUtc { get; init; }
 }

@@ -7,7 +7,7 @@ namespace ToDo.Domain.Todo;
 public sealed class TodoItem : Entity
 {
     public Title Title { get; private set; }
-    public Description? Description { get; private set; }
+    public Description Description { get; private set; }
     public DateTime? DueDate { get; private set; }
     public bool IsCompleted { get; private set; }
     public Priority Priority { get; private set; }
@@ -19,7 +19,7 @@ public sealed class TodoItem : Entity
         Guid id,
         Guid todoListId,
         Title title,
-        Description? description,
+        Description description,
         DateTime? dueDate,
         Priority priority,
         DateTime nowUtc) : base(id)
@@ -37,7 +37,7 @@ public sealed class TodoItem : Entity
         Priority priority,
         DateTime createdOnUtc,
         Guid todoListId,
-        Description? description = null,
+        Description description = null,
         DateTime? dueDate = null)
     {
         if (dueDate is not null && dueDate < DateTime.UtcNow)

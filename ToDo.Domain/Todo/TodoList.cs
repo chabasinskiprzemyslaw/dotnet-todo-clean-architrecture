@@ -19,7 +19,7 @@ public sealed class TodoList : Entity
     }
 
     public Title Title { get; private set; }
-    public Description? Description { get; private set; }
+    public Description Description { get; private set; }
     public Guid OwnerId { get; private set; }
     public List<TodoItem> TodoItems { get; private set; } = new();
     public DateTime CreatedOnUtc { get; private set; }
@@ -28,7 +28,7 @@ public sealed class TodoList : Entity
         Title title,
         Guid ownerId,
         DateTime utcNow,
-        Description? description = null)
+        Description description)
     {
         TodoList todoList = new TodoList(Guid.NewGuid(), title, ownerId, utcNow, description);
 
