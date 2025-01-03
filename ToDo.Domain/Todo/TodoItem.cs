@@ -13,15 +13,18 @@ public sealed class TodoItem : Entity
     public Priority Priority { get; private set; }
     public DateTime CreatedOnUtc { get; private set; }
     public DateTime? CompletedOnUtc { get; private set; }
+    public Guid TodoListId { get; private set; }
 
     private TodoItem(
         Guid id,
+        Guid todoListId,
         Title title,
         Description? description,
         DateTime? dueDate,
         Priority priority,
         DateTime nowUtc) : base(id)
     {
+        TodoListId = todoListId;
         Title = title;
         Description = description;
         DueDate = dueDate;
@@ -33,6 +36,7 @@ public sealed class TodoItem : Entity
         Title title,
         Priority priority,
         DateTime createdOnUtc,
+        Guid todoListId,
         Description? description = null,
         DateTime? dueDate = null)
     {
@@ -43,6 +47,7 @@ public sealed class TodoItem : Entity
 
         TodoItem todoItem = new TodoItem(
             Guid.NewGuid(),
+            todoListId,
             title,
             description,
             dueDate,
@@ -64,7 +69,7 @@ public sealed class TodoItem : Entity
         IsCompleted = true;
         CompletedOnUtc = completedOnUtc;
 
-        RaiseDomainEvent(new TodoItemCompletedDomainEvent(Id));
+        RaiseDomainEvent(new TodoItemCompletedDomainEvent(Id, TodoListId));
 
         return Result.Success();
     }

@@ -2,4 +2,4 @@
 
 namespace ToDo.Domain.Todo.Events;
 
-public sealed record TodoItemCompletedDomainEvent(Guid TodoItemId) : IDomainEvent;
+public sealed record TodoItemCompletedDomainEvent(Guid TodoItemId, Guid TodoListId) : IDomainEvent;
