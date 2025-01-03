@@ -27,7 +27,7 @@ internal sealed class CreateTodoItemCommandHandler : ICommandHandler<CreateTodoI
 
     public async Task<Result<Guid>> Handle(CreateTodoItemCommand request, CancellationToken cancellationToken)
     {
-        Description? description = null;
+        string descriptionString = request.Description ?? string.Empty;
         var todoList = await _todoListRepository.GetAsync(request.TodoListId, cancellationToken);
 
         if (todoList is null)
@@ -37,10 +37,7 @@ internal sealed class CreateTodoItemCommandHandler : ICommandHandler<CreateTodoI
 
         Title title = Title.Create(request.Title);
 
-        if (!string.IsNullOrWhiteSpace(request.Description)) 
-        {
-            description = Description.Create(request.Description);
-        }
+        Description description = Description.Create(descriptionString);
 
         TodoItem? todoItem = TodoItem.Create(
             title,
