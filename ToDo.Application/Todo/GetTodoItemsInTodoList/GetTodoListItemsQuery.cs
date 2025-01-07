@@ -2,4 +2,4 @@
 
 namespace ToDo.Application.Todo.GetTodoItemsInTodoList;
 
-public sealed record GetTodoItemsInTodoListQuery(Guid TodoListId) : IQuery<List<TodoItemResponse>>;
+public sealed record GetTodoListItemsQuery(Guid TodoListId) : IQuery<List<TodoItemResponse>>;

@@ -15,6 +15,8 @@ public sealed class TodoItem : Entity
     public DateTime? CompletedOnUtc { get; private set; }
     public Guid TodoListId { get; private set; }
 
+    private TodoItem() {}
+
     private TodoItem(
         Guid id,
         Guid todoListId,
@@ -32,7 +34,7 @@ public sealed class TodoItem : Entity
         CreatedOnUtc = nowUtc;
     }
 
-    public static TodoItem Create(
+    public static Result<TodoItem> Create(
         Title title,
         Priority priority,
         DateTime createdOnUtc,
@@ -42,7 +44,7 @@ public sealed class TodoItem : Entity
     {
         if (dueDate is not null && dueDate < DateTime.UtcNow)
         {
-            throw new ArgumentException("Due date cannot be in the past", nameof(dueDate));
+            return Result.Failure<TodoItem>(TodoItemErrors.DueDateInThePast);
         }
 
         TodoItem todoItem = new TodoItem(
@@ -56,7 +58,7 @@ public sealed class TodoItem : Entity
 
         todoItem.RaiseDomainEvent(new TodoItemCreatedDomainEvent(todoItem.Id));
 
-        return todoItem;
+        return Result.Success(todoItem);
     }
 
     public Result MarkAsCompleted(DateTime completedOnUtc)

@@ -27,29 +27,35 @@ internal sealed class CreateTodoItemCommandHandler : ICommandHandler<CreateTodoI
 
     public async Task<Result<Guid>> Handle(CreateTodoItemCommand request, CancellationToken cancellationToken)
     {
-        string descriptionString = request.Description ?? string.Empty;
-        var todoList = await _todoListRepository.GetAsync(request.TodoListId, cancellationToken);
+        TodoList? todoList = await _todoListRepository.GetAsync(request.TodoListId, cancellationToken);
 
         if (todoList is null)
         {
             return Result.Failure<Guid>(TodoListErrors.NotFound);
         }
 
-        Title title = Title.Create(request.Title);
-
-        Description description = Description.Create(descriptionString);
-
-        TodoItem? todoItem = TodoItem.Create(
-            title,
+        var todoItemResult = todoList.CreateTodoItem(
+            Title.Create(request.Title),
             request.Priority,
             _timeProvider.UtcNow,
-            todoList.Id,
-            description,
+            Description.Create(request.Description ?? string.Empty),
             request.DueDate);
 
-        todoList.AddTodoItem(todoItem);
-        await _unitOfWork.SaveChangesAsync();
+        if (todoItemResult.IsFailure)
+        {
+            return Result.Failure<Guid>(todoItemResult.Error);
+        }
 
-        return Result.Success<Guid>(todoItem.Id);
+        try
+        {
+            await _unitOfWork.SaveChangesAsync(cancellationToken);
+        }
+        catch(Exception ex)
+        {
+            throw;
+        }
+
+
+        return Result.Success(todoItemResult.Value.Id);
     }
 }
