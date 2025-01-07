@@ -1,4 +1,5 @@
-﻿using ToDo.Domain.Abstractions;
+﻿using System.ComponentModel.DataAnnotations;
+using ToDo.Domain.Abstractions;
 using ToDo.Domain.Todo.Events;
 
 namespace ToDo.Domain.Todo;
@@ -18,11 +19,16 @@ public sealed class TodoList : Entity
         CreatedOnUtc = utcNow;
     }
 
+    private TodoList() { }
+
     public Title Title { get; private set; }
     public Description Description { get; private set; }
     public Guid OwnerId { get; private set; }
     public List<TodoItem> TodoItems { get; private set; } = new();
     public DateTime CreatedOnUtc { get; private set; }
+
+    [Timestamp]
+    public byte[] RowVersion { get; private set; }
 
     public static TodoList Create(
         Title title,
@@ -35,6 +41,24 @@ public sealed class TodoList : Entity
         todoList.RaiseDomainEvent(new TodoListCreatedDomainEvent(todoList.Id));
 
         return todoList;
+    }
+
+    public Result<TodoItem> CreateTodoItem(
+    Title title,
+    Priority priority,
+    DateTime createdOnUtc,
+    Description description = null,
+    DateTime? dueDate = null)
+    {
+        var todoItemResult = TodoItem.Create(title, priority, createdOnUtc, Id, description, dueDate);
+
+        if (todoItemResult.IsFailure)
+        {
+            return Result.Failure<TodoItem>(todoItemResult.Error);
+        }
+
+        AddTodoItem(todoItemResult.Value);
+        return Result.Success(todoItemResult.Value);
     }
 
     public void AddTodoItem(TodoItem todoItem)

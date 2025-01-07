@@ -6,7 +6,7 @@ using ToDo.Domain.Todo;
 
 namespace ToDo.Application.Todo.GetTodoItemsInTodoList;
 
-internal sealed class GetTodoItemsInTodoListQueryHandler : IQueryHandler<GetTodoItemsInTodoListQuery, List<TodoItemResponse>>
+internal sealed class GetTodoListItemsQueryHandler : IQueryHandler<GetTodoListItemsQuery, List<TodoItemResponse>>
 {
     private static readonly int[] PriorityStatuses =
     {
@@ -17,16 +17,16 @@ internal sealed class GetTodoItemsInTodoListQueryHandler : IQueryHandler<GetTodo
 
     private readonly ISqlConnectionFactory _connectionFactory;
 
-    public GetTodoItemsInTodoListQueryHandler(ISqlConnectionFactory connectionFactory)
+    public GetTodoListItemsQueryHandler(ISqlConnectionFactory connectionFactory)
     {
         _connectionFactory = connectionFactory;
     }
 
-    public async Task<Result<List<TodoItemResponse>>> Handle(GetTodoItemsInTodoListQuery request, CancellationToken cancellationToken)
+    public async Task<Result<List<TodoItemResponse>>> Handle(GetTodoListItemsQuery request, CancellationToken cancellationToken)
     {
         using var connection = _connectionFactory.CreateConnection();
 
-        string sql = string.Empty;
+        string sql = "SELECT [Id], [Title], [Description], [IsCompleted] from TodoItems";
 
         var todoItems = await connection.QueryAsync<TodoItemResponse>(
             sql,

@@ -18,7 +18,7 @@ internal sealed class GetTodoListInfoQueryHandler : IQueryHandler<GetTodoListInf
     {
         using var connection = _connectionFactory.CreateConnection();
 
-        string sql = string.Empty;
+        string sql = "SELECT [Id], [Title], [Description], [OwnerId], [CreatedOnUtc] FROM TodoLists";
 
         TodoListResponse? todoList = await connection.QueryFirstOrDefaultAsync<TodoListResponse>(
             sql,

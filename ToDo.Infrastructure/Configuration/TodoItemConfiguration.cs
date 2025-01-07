@@ -11,6 +11,9 @@ internal sealed class TodoItemConfiguration : IEntityTypeConfiguration<TodoItem>
         builder.ToTable("TodoItems");
         builder.HasKey(t => t.Id);
 
+        builder.Property(x => x.Id)
+            .ValueGeneratedNever();
+
         builder.Property(x => x.Title)
             .HasMaxLength(100)
             .HasConversion(x => x.Value, value => Title.Create(value))

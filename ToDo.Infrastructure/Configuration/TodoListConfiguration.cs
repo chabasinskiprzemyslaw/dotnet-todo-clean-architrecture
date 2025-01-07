@@ -29,5 +29,8 @@ internal sealed class TodoListConfiguration : IEntityTypeConfiguration<TodoList>
         builder.HasOne<User>()
             .WithMany()
             .HasForeignKey(x => x.OwnerId);
+
+        builder.Property(x => x.RowVersion)
+            .IsRowVersion();
     }
 }

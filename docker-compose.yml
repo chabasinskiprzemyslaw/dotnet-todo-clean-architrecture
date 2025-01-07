@@ -1,0 +1,36 @@
+services:
+  todo.api:
+    image: ${DOCKER_REGISTRY-}todoapi
+    container_name: ToDo.Api
+    build:
+      context: .
+      dockerfile: ToDo.Api/Dockerfile
+    depends_on:
+      - db
+
+  db:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: sql-server
+    ports:
+      - "1433:1433"
+    environment:
+      - ACCEPT_EULA=Y
+      - MSSQL_SA_PASSWORD=Passw0rd!
+      - MSSQL_PID=Express
+    volumes:
+      - sql-data:/var/opt/mssql 
+
+  idp:
+    image: quay.io/keycloak/keycloak:latest
+    container_name: idp
+    command: start-dev --import-realm
+    environment:
+        - KEYCLOAK_ADMIN=admin
+        - KEYCLOAK_ADMIN_PASSWORD=admin
+    volumes:
+        - ./.containers/identity:/opt/keycloak/data
+    ports:
+        - 18080:8080
+
+volumes:
+  sql-data:

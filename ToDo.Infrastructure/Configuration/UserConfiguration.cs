@@ -25,5 +25,7 @@ internal sealed class UserConfiguration : IEntityTypeConfiguration<User>
             .HasConversion(x => x.Value, value => new Domain.Users.Email(value));
 
         builder.HasIndex(x => x.Email).IsUnique();
+
+        builder.HasIndex(user => user.IdentityId).IsUnique();
     }
 }
