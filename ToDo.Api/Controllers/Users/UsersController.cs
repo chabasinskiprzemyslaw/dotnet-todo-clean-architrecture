@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using ToDo.Application.Users.GetUser;
 using ToDo.Application.Users.GetUsers;
+using ToDo.Application.Users.LoginUser;
 
 namespace ToDo.Api.Controllers.Users;
 
@@ -58,6 +59,24 @@ public class UsersController : ControllerBase
         if (result.IsFailure)
         {
             return BadRequest(result.Error);
+        }
+
+        return Ok(result.Value);
+    }
+
+    [AllowAnonymous]
+    [HttpPost("login")]
+    public async Task<IActionResult> LogIn(
+        LogInUserRequest request,
+        CancellationToken cancellationToken)
+    {
+        var command = new LogInUserCommand(request.Email, request.Password);
+
+        var result = await _sender.Send(command, cancellationToken);
+
+        if (result.IsFailure)
+        {
+            return Unauthorized(result.Error);
         }
 
         return Ok(result.Value);

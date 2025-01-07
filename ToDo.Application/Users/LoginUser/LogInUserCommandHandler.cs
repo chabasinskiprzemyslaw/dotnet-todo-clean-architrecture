@@ -1,4 +1,5 @@
-﻿using ToDo.Application.Abstractions.Messaging;
+﻿using ToDo.Application.Abstractions.Authentication;
+using ToDo.Application.Abstractions.Messaging;
 using ToDo.Domain.Abstractions;
 using ToDo.Domain.Users;
 

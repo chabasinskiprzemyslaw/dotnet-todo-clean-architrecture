@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
+using ToDo.Application.Abstractions.Authentication;
 using ToDo.Application.Abstractions.Clock;
 using ToDo.Application.Abstractions.Data;
 using ToDo.Application.Abstractions.Email;
@@ -56,6 +57,13 @@ public static class DependencyInjection
             httpClient.BaseAddress = new Uri(keycloakOptions.AdminUrl);
         })
             .AddHttpMessageHandler<AdminAuthorizationDelegatingHandler>();
+
+        services.AddHttpClient<IJwtService, JwtService>((serviceProvider, httpClient) =>
+        {
+            var keycloakOptions = serviceProvider.GetRequiredService<IOptions<KeycloakOptions>>().Value;
+
+            httpClient.BaseAddress = new Uri(keycloakOptions.TokenUrl);
+        });
 
         return services;
     }
