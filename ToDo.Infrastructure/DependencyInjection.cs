@@ -6,6 +6,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using ToDo.Application.Abstractions.Authentication;
+using ToDo.Application.Abstractions.Caching;
 using ToDo.Application.Abstractions.Clock;
 using ToDo.Application.Abstractions.Data;
 using ToDo.Application.Abstractions.Email;
@@ -14,6 +15,7 @@ using ToDo.Domain.Todo;
 using ToDo.Domain.Users;
 using ToDo.Infrastructure.Authentication;
 using ToDo.Infrastructure.Authorization;
+using ToDo.Infrastructure.Caching;
 using ToDo.Infrastructure.Clock;
 using ToDo.Infrastructure.Data;
 using ToDo.Infrastructure.Email;
@@ -31,6 +33,7 @@ public static class DependencyInjection
         AddPersistance(services, configuration);
         AddAuthentication(services, configuration);
         AddAuthorization(services);
+        AddCaching(services, configuration);
 
         return services;
     }
@@ -90,5 +93,15 @@ public static class DependencyInjection
 
         services.AddTransient<IAuthorizationHandler, PermissionAuthorizationHandler>();
         services.AddTransient<IAuthorizationPolicyProvider, PermissionAuthorizationPolicyProvider>();
+    }
+
+    private static void AddCaching(IServiceCollection services, IConfiguration configuration)
+    {
+        var connectionString = configuration.GetConnectionString("Cache") ?? 
+            throw new ArgumentNullException(nameof(configuration));
+
+        services.AddStackExchangeRedisCache(options => options.Configuration = connectionString);
+
+        services.AddSingleton<ICacheService, CacheService>();
     }
 }
