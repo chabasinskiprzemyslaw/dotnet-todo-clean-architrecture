@@ -7,6 +7,5 @@ public sealed class CreateTodoListCommandValidator : AbstractValidator<CreateTod
     public CreateTodoListCommandValidator()
     {
         RuleFor(x => x.Title).NotEmpty();
-        RuleFor(x => x.OwnerId).NotEmpty();
     }
 }

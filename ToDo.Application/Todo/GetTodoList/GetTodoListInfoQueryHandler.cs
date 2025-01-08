@@ -1,17 +1,23 @@
 ﻿using Dapper;
+using ToDo.Application.Abstractions.Authentication;
 using ToDo.Application.Abstractions.Data;
 using ToDo.Application.Abstractions.Messaging;
 using ToDo.Domain.Abstractions;
+using ToDo.Domain.Todo;
 
 namespace ToDo.Application.Todo.GetTodoList;
 
 internal sealed class GetTodoListInfoQueryHandler : IQueryHandler<GetTodoListInfoQuery, TodoListResponse?>
 {
     private readonly ISqlConnectionFactory _connectionFactory;
+    private readonly IUserContext _userContext;
 
-    public GetTodoListInfoQueryHandler(ISqlConnectionFactory connectionFactory)
+    public GetTodoListInfoQueryHandler(
+        ISqlConnectionFactory connectionFactory,
+        IUserContext userContext)
     {
         _connectionFactory = connectionFactory;
+        _userContext = userContext;
     }
 
     public async Task<Result<TodoListResponse?>> Handle(GetTodoListInfoQuery request, CancellationToken cancellationToken)
@@ -26,6 +32,11 @@ internal sealed class GetTodoListInfoQueryHandler : IQueryHandler<GetTodoListInf
             {
                 request.TodoListId
             });
+
+        if (todoList is null || todoList.OwnerId != _userContext.UserId)
+        {
+            return Result.Failure<TodoListResponse?>(TodoListErrors.NotFound);
+        }
 
         return Result.Success(todoList);
     }

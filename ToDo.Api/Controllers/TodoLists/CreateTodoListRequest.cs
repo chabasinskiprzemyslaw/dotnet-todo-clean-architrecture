@@ -2,7 +2,7 @@
 
 namespace ToDo.Api.Controllers.TodoLists;
 
-public sealed record CreateTodoListRequest(Guid OwnerId, string Title, string? Description)
+public sealed record CreateTodoListRequest(string Title, string? Description)
 {
-    public CreateTodoListCommand ToCommand() => new(OwnerId, Title, Description);
+    public CreateTodoListCommand ToCommand() => new CreateTodoListCommand(Title, Description);
 }
