@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using ToDo.Infrastructure;
 
@@ -11,9 +12,11 @@ using ToDo.Infrastructure;
 namespace ToDo.Infrastructure.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250107134614_Add_User_Roles")]
+    partial class Add_User_Roles
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -110,30 +113,6 @@ namespace ToDo.Infrastructure.Migrations
                     b.ToTable("TodoLists", (string)null);
                 });
 
-            modelBuilder.Entity("ToDo.Domain.Users.Permission", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("permissions", (string)null);
-
-                    b.HasData(
-                        new
-                        {
-                            Id = 1,
-                            Name = "user:read"
-                        });
-                });
-
             modelBuilder.Entity("ToDo.Domain.Users.Role", b =>
                 {
                     b.Property<int>("Id")
@@ -155,28 +134,6 @@ namespace ToDo.Infrastructure.Migrations
                         {
                             Id = 1,
                             Name = "Registered"
-                        });
-                });
-
-            modelBuilder.Entity("ToDo.Domain.Users.RolePermission", b =>
-                {
-                    b.Property<int>("RoleId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("PermissionId")
-                        .HasColumnType("int");
-
-                    b.HasKey("RoleId", "PermissionId");
-
-                    b.HasIndex("PermissionId");
-
-                    b.ToTable("role_permissions", (string)null);
-
-                    b.HasData(
-                        new
-                        {
-                            RoleId = 1,
-                            PermissionId = 1
                         });
                 });
 
@@ -245,21 +202,6 @@ namespace ToDo.Infrastructure.Migrations
                     b.HasOne("ToDo.Domain.Users.User", null)
                         .WithMany()
                         .HasForeignKey("OwnerId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
-            modelBuilder.Entity("ToDo.Domain.Users.RolePermission", b =>
-                {
-                    b.HasOne("ToDo.Domain.Users.Permission", null)
-                        .WithMany()
-                        .HasForeignKey("PermissionId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("ToDo.Domain.Users.Role", null)
-                        .WithMany()
-                        .HasForeignKey("RoleId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });

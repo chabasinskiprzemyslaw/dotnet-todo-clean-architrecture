@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -12,6 +13,7 @@ using ToDo.Domain.Abstractions;
 using ToDo.Domain.Todo;
 using ToDo.Domain.Users;
 using ToDo.Infrastructure.Authentication;
+using ToDo.Infrastructure.Authorization;
 using ToDo.Infrastructure.Clock;
 using ToDo.Infrastructure.Data;
 using ToDo.Infrastructure.Email;
@@ -26,22 +28,17 @@ public static class DependencyInjection
     {
         services.AddTransient<IDateTimeProvider, DateTimeProvider>();
         services.AddTransient<IEmailService, EmailService>();
+        AddPersistance(services, configuration);
+        AddAuthentication(services, configuration);
+        AddAuthorization(services);
 
-        var connectionString = configuration.GetConnectionString("DefaultConnection") ?? throw new ArgumentNullException(nameof(configuration));
+        return services;
+    }
 
-        services.AddDbContext<ApplicationDbContext>(options =>
-        {
-            options.UseSqlServer(connectionString);
-        });
-
-        services.AddScoped<IUserRepository, UserRepository>();
-        services.AddScoped<ITodoListRepository, TodoListRepository>();
-
-        services.AddScoped<IUnitOfWork>(provider => provider.GetRequiredService<ApplicationDbContext>());
-        services.AddSingleton<ISqlConnectionFactory>(_ => new SqlConnectionFactory(connectionString));
-
+    private static void AddAuthentication(IServiceCollection services, IConfiguration configuration)
+    {
         services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-            .AddJwtBearer();
+                    .AddJwtBearer();
 
         services.Configure<ToDo.Infrastructure.Authentication.AuthenticationOptions>(configuration.GetSection("Authentication"));
         services.ConfigureOptions<JwtBearerOptionsSetup>();
@@ -65,6 +62,33 @@ public static class DependencyInjection
             httpClient.BaseAddress = new Uri(keycloakOptions.TokenUrl);
         });
 
-        return services;
+        services.AddHttpContextAccessor();
+
+        services.AddScoped<IUserContext, UserContext>();
+    }
+
+    private static void AddPersistance(IServiceCollection services, IConfiguration configuration)
+    {
+        var connectionString = configuration.GetConnectionString("DefaultConnection") ?? throw new ArgumentNullException(nameof(configuration));
+
+        services.AddDbContext<ApplicationDbContext>(options =>
+        {
+            options.UseSqlServer(connectionString);
+        });
+
+        services.AddScoped<IUserRepository, UserRepository>();
+        services.AddScoped<ITodoListRepository, TodoListRepository>();
+
+        services.AddScoped<IUnitOfWork>(provider => provider.GetRequiredService<ApplicationDbContext>());
+        services.AddSingleton<ISqlConnectionFactory>(_ => new SqlConnectionFactory(connectionString));
+    }
+
+    private static void AddAuthorization(this IServiceCollection services)
+    {
+        services.AddScoped<AuthorizationService>();
+        services.AddTransient<IClaimsTransformation, CustomClaimsTransformation>();
+
+        services.AddTransient<IAuthorizationHandler, PermissionAuthorizationHandler>();
+        services.AddTransient<IAuthorizationPolicyProvider, PermissionAuthorizationPolicyProvider>();
     }
 }

@@ -1,10 +1,9 @@
 ﻿using Dapper;
-using MediatR;
 using ToDo.Application.Abstractions.Data;
 using ToDo.Application.Abstractions.Messaging;
 using ToDo.Application.Todo.GetTodoList;
 using ToDo.Domain.Abstractions;
-using ToDo.Domain.Todo;
+
 
 namespace ToDo.Application.Todo.GetTodoLists;
 
