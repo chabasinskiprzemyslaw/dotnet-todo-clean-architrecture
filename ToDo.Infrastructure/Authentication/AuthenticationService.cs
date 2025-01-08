@@ -33,19 +33,13 @@ internal sealed class AuthenticationService : IAuthenticationService
             }
         };
 
-        try
-        {
-            var response = await _httpClient.PostAsJsonAsync(
-                "users",
-                userRepresentationModel,
-                cancellationToken);
+        var response = await _httpClient.PostAsJsonAsync(
+            "users",
+            userRepresentationModel,
+            cancellationToken);
 
-            return ExtractIdentityIdFromLocationHeader(response);
-        }
-        catch(Exception ex)
-        {
-            throw;
-        }
+        return ExtractIdentityIdFromLocationHeader(response);
+        
     }
 
     private static string ExtractIdentityIdFromLocationHeader(

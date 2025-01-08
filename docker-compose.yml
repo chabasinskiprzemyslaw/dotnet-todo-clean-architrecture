@@ -32,5 +32,16 @@ services:
     ports:
         - 18080:8080
 
+  seq:
+    image: datalust/seq:latest
+    container_name: ToDo.Seq
+    environment:
+        - ACCEPT_EULA=Y
+    ports:
+    - 5341:5341
+    - 8081:80
+  
+
+
 volumes:
   sql-data:
