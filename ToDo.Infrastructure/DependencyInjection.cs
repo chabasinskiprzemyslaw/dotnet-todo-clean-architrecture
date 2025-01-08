@@ -6,6 +6,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
+using Quartz;
 using ToDo.Application.Abstractions.Authentication;
 using ToDo.Application.Abstractions.Caching;
 using ToDo.Application.Abstractions.Clock;
@@ -20,6 +21,7 @@ using ToDo.Infrastructure.Caching;
 using ToDo.Infrastructure.Clock;
 using ToDo.Infrastructure.Data;
 using ToDo.Infrastructure.Email;
+using ToDo.Infrastructure.Outbox;
 using ToDo.Infrastructure.Repositories;
 namespace ToDo.Infrastructure;
 
@@ -37,6 +39,7 @@ public static class DependencyInjection
         AddCaching(services, configuration);
         AddHealthChecks(services, configuration);
         AddApiVersioning(services);
+        AddBackgroundJobs(services, configuration);
 
         return services;
     }
@@ -133,5 +136,16 @@ public static class DependencyInjection
                 o.GroupNameFormat = "'v'V";
                 o.SubstituteApiVersionInUrl = true;
             });
+    }
+
+    private static void AddBackgroundJobs(IServiceCollection services, IConfiguration configuration)
+    {
+        var config = configuration.GetSection("Outbox");
+        services.Configure<OutboxOptions>(config);
+
+        services.AddQuartz();
+
+        services.AddQuartzHostedService(o => o.WaitForJobsToComplete = true);
+        services.ConfigureOptions<ProcessOutboxMessagesJobSetup>();
     }
 }
