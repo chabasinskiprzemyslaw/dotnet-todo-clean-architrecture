@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Serilog;
 using ToDo.Api.Extensions;
+using ToDo.Api.OpenApi;
 using ToDo.Application;
 using ToDo.Application.Abstractions.Data;
 using ToDo.Infrastructure;
@@ -22,6 +23,8 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddApplication();
 builder.Services.AddInfrastructure(builder.Configuration);
 
+builder.Services.ConfigureOptions<ConfigureSwaggerOptions>();
+
 //builder.Services.AddHealthChecks()
 //    .AddCheck<CustomSqlHealthCheck>("custom-sql");
 
@@ -31,7 +34,17 @@ var app = builder.Build();
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
-    app.UseSwaggerUI();
+    app.UseSwaggerUI(o =>
+    {
+        var descriptions = app.DescribeApiVersions();
+
+        foreach (var desc in descriptions)
+        {
+            var url = $"/swagger/{desc.GroupName}/swagger.json";
+            var name = desc.GroupName.ToUpperInvariant();
+            o.SwaggerEndpoint(url, name);
+        }
+    });
 
     app.ApplyMigrations();
 

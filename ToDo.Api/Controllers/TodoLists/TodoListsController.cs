@@ -1,4 +1,5 @@
-﻿using MediatR;
+﻿using Asp.Versioning;
+using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using ToDo.Application.Todo.CreateTodoItem;
@@ -10,7 +11,8 @@ namespace ToDo.Api.Controllers.TodoLists;
 
 [Authorize]
 [ApiController]
-[Route("api/todolists")]
+[ApiVersion(ApiVersions.V1)]
+[Route("api/v{version:apiVersion}/todolists")]
 public class TodoListsController : ControllerBase
 {
     private readonly ISender _sender;

@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Authentication;
+﻿using Asp.Versioning;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
@@ -35,6 +36,7 @@ public static class DependencyInjection
         AddAuthorization(services);
         AddCaching(services, configuration);
         AddHealthChecks(services, configuration);
+        AddApiVersioning(services);
 
         return services;
     }
@@ -112,5 +114,24 @@ public static class DependencyInjection
             .AddSqlServer(configuration.GetConnectionString("DefaultConnection")!)
             .AddRedis(configuration.GetConnectionString("Cache")!)
             .AddUrlGroup(new Uri(configuration["KeyCloak:BaseUrl"]!), HttpMethod.Get, "keycloak");
+    }
+
+    private static void AddApiVersioning(IServiceCollection services)
+    {
+        services.AddApiVersioning(o =>
+        {
+            o.DefaultApiVersion = new ApiVersion(1);
+            o.ReportApiVersions = true;
+            //o.ApiVersionReader = new HeaderApiVersionReader();
+            //o.ApiVersionReader = new QueryStringApiVersionReader();
+            //o.ApiVersionReader = ApiVersionReader.Combine(new HeaderApiVersionReader(), new UrlSegmentApiVersionReader());
+            o.ApiVersionReader = new UrlSegmentApiVersionReader();
+        })
+            .AddMvc()
+            .AddApiExplorer(o =>
+            {
+                o.GroupNameFormat = "'v'V";
+                o.SubstituteApiVersionInUrl = true;
+            });
     }
 }
