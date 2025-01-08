@@ -1,4 +1,5 @@
-﻿using MediatR;
+﻿using Asp.Versioning;
+using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using ToDo.Application.Users.GetLoggedInUser;
@@ -11,7 +12,9 @@ namespace ToDo.Api.Controllers.Users;
 
 [Authorize]
 [ApiController]
-[Route("api/users")]
+[ApiVersion(ApiVersions.V1)]
+[ApiVersion(ApiVersions.V2)]
+[Route("api/v{version:apiVersion}/users")]
 public class UsersController : ControllerBase
 {
     private readonly ISender _sender;
@@ -22,8 +25,22 @@ public class UsersController : ControllerBase
     }
 
     [HttpGet("me")]
+    [MapToApiVersion(ApiVersions.V1)]
     [HasPermission(Permissions.UserRead)]
-    public async Task<IActionResult> GetLoggedInUser(CancellationToken cancellationToken)
+    public async Task<IActionResult> GetLoggedInUserV1(CancellationToken cancellationToken)
+    {
+        var query = new GetLoggedInUserQuery();
+        var result = await _sender.Send(query, cancellationToken);
+
+        return result.IsSuccess
+            ? Ok(result.Value)
+            : NotFound();
+    }
+
+    [HttpGet("me")]
+    [MapToApiVersion(ApiVersions.V2)]
+    [HasPermission(Permissions.UserRead)]
+    public async Task<IActionResult> GetLoggedInUserV2(CancellationToken cancellationToken)
     {
         var query = new GetLoggedInUserQuery();
         var result = await _sender.Send(query, cancellationToken);
